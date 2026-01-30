@@ -1,11 +1,13 @@
 #include "../includes/constants.hpp"
 
-
 int main(int ac, char **av){
     (void)ac;
     (void)av;
-    uint16_t width = CWIDTH;
-    uint16_t height = CHEIGHT;
+    int width = CWIDTH;
+    int height = CHEIGHT;
+    GraphicsEngine  engine;
+
+
     if (ac >= 2) {
         auto widthRes = std::from_chars(av[1], av[1] + std::strlen(av[1]), width);
         if (widthRes.ec != std::errc{}) 
@@ -16,23 +18,39 @@ int main(int ac, char **av){
         if (heightRes.ec != std::errc{})
             height = CHEIGHT;
     }
-    SDL_Window  *window = SDL_CreateWindow(TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, WINDOW_OPTIONS);
-    if (window == NULL){
-        std::cerr << "Failed to intialize the window T_T" << std::endl;
+
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) < 0){
+        std::cerr << "Error Reason: " << SDL_GetError() << std::endl;
         return (2);
     }
+    engine.window_width = width;
+    engine.window_height = height;
+    SDL_Window      *window = nullptr;
+    SDL_Renderer    *frameFactory = nullptr;
 
-    bool runingCond = true;
-    SDL_Event event;
-    while (runingCond){
-        SDL_PollEvent(&event);
-        std::cout << event.type << std::endl;
-        switch (event.type){
-            case SDL_QUIT:
-                SDL_DestroyWindow(window);
-                SDL_Quit();
-                return (0);
-        }
+    SDL_CreateWindowAndRenderer(width, height, WINDOW_OPTIONS, &window, &frameFactory);
+    engine.win = window;
+    engine.frameFactory = frameFactory;
+    if (window == nullptr || frameFactory == nullptr){
+        cleanup(engine);
+        std::cerr << "Error Reason: " << SDL_GetError() << std::endl;
+        return (2);
     }
+    SDL_SetWindowTitle(window, TITLE.c_str());
+    bool runingCond = true;
+    SDL_Event sdlEvent;
+    while (runingCond){
+        /*
+            SDL_PollEvent(SDL_Event& ev); will enter the loop only and only if
+            there was an event that triggered it.
+        */
+        while(SDL_PollEvent(&sdlEvent)){
+            performEvent(runingCond, sdlEvent);
+            SDL_Delay(MS_TIMEOUT);
+        }
+
+        updateFrame(engine);
+    }
+    cleanup(engine);
     return (0);
 }
