@@ -5,12 +5,12 @@ void    clearFrameBuffer(GraphicsEngine &engine){
 }
 
 void    cartesianPlot(GraphicsEngine &engine, int x, int y, const t_rgba color = default_color){
-
     SDL_SetRenderDrawColor(engine.frameFactory, color.r, color.g, color.b, color.a);
     SDL_RenderDrawPoint(engine.frameFactory,
     (engine.window_width / 2) + (x),
     (engine.window_height / 2) - (y)
     );
+    std::cout << "Rendered point at: {" << ((engine.window_width / 2) + (x)) << ", " << ((engine.window_height / 2) - (y)) << "}" << std::endl;
 }
 
 void    drawFrame(GraphicsEngine &engine){
@@ -21,11 +21,11 @@ void    drawFrame(GraphicsEngine &engine){
     SDL_SetRenderDrawColor(engine.frameFactory, 0, 0, 0, 255);
     SDL_RenderDrawLine(engine.frameFactory, 0, engine.window_height / 2, engine.window_width, engine.window_height / 2);
     SDL_RenderDrawLine(engine.frameFactory, engine.window_width / 2, 0, engine.window_width / 2, engine.window_height);
-    
 }
 
 void    updateFrame(GraphicsEngine &engine){
     clearFrameBuffer(engine);
     drawFrame(engine);
     SDL_RenderPresent(engine.frameFactory);
+    SDL_Delay(MS_TIMEOUT);
 }

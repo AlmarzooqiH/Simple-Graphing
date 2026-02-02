@@ -48,7 +48,6 @@ int main(int ac, char **av){
             performEvent(runingCond, sdlEvent);
             SDL_Delay(MS_TIMEOUT);
         }
-
         updateFrame(engine);
     }
     cleanup(engine);
